@@ -1,0 +1,84 @@
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Config of the encoder: <class 'transformers.models.donut.modeling_donut_swin.DonutSwinModel'> is overwritten by shared encoder config: DonutSwinConfig {
+  "attention_probs_dropout_prob": 0.0,
+  "depths": [
+    2,
+    2,
+    14,
+    2
+  ],
+  "drop_path_rate": 0.1,
+  "embed_dim": 128,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.0,
+  "hidden_size": 1024,
+  "image_size": [
+    2560,
+    1920
+  ],
+  "initializer_range": 0.02,
+  "layer_norm_eps": 1e-05,
+  "mlp_ratio": 4.0,
+  "model_type": "donut-swin",
+  "num_channels": 3,
+  "num_heads": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "num_layers": 4,
+  "patch_size": 4,
+  "path_norm": true,
+  "qkv_bias": true,
+  "torch_dtype": "float16",
+  "transformers_version": "4.51.3",
+  "use_absolute_embeddings": false,
+  "window_size": 10
+}
+
+Config of the decoder: <class 'transformers.models.mbart.modeling_mbart.MBartForCausalLM'> is overwritten by shared decoder config: MBartConfig {
+  "activation_dropout": 0.0,
+  "activation_function": "gelu",
+  "add_cross_attention": true,
+  "add_final_layer_norm": true,
+  "attention_dropout": 0.0,
+  "bos_token_id": 0,
+  "classifier_dropout": 0.0,
+  "d_model": 1024,
+  "decoder_attention_heads": 16,
+  "decoder_ffn_dim": 4096,
+  "decoder_layerdrop": 0.0,
+  "decoder_layers": 4,
+  "dropout": 0.1,
+  "encoder_attention_heads": 16,
+  "encoder_ffn_dim": 4096,
+  "encoder_layerdrop": 0.0,
+  "encoder_layers": 12,
+  "eos_token_id": 2,
+  "forced_eos_token_id": 2,
+  "init_std": 0.02,
+  "is_decoder": true,
+  "is_encoder_decoder": false,
+  "max_position_embeddings": 128,
+  "model_type": "mbart",
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "scale_embedding": true,
+  "torch_dtype": "float16",
+  "transformers_version": "4.51.3",
+  "use_cache": true,
+  "vocab_size": 57532
+}
+
+W0930 19:37:36.889000 2672 env\Lib\site-packages\torch\utils\flop_counter.py:113] triton not found; flop counting will not work for triton kernels
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:12<00:12, 12.97s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:19<00:00,  9.27s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:19<00:00,  9.82s/it]
+Some parameters are on the meta device because they were offloaded to the cpu.
+D:\Thesis\env\Lib\site-packages\gradio\routes.py:1368: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+D:\Thesis\env\Lib\site-packages\transformers\generation\utils.py:2347: UserWarning: You are calling .generate() with the `input_ids` being on a device type different than your model's device. `input_ids` is on cuda, whereas the model is on meta. You may experience unexpected behaviors or slower generation. Please make sure that you have put `input_ids` to the correct device by calling for example input_ids = input_ids.to('meta') before running `.generate()`.
+  warnings.warn(
+D:\Thesis\env\Lib\site-packages\gradio\routes.py:1368: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+D:\Thesis\env\Lib\site-packages\transformers\generation\utils.py:2347: UserWarning: You are calling .generate() with the `input_ids` being on a device type different than your model's device. `input_ids` is on cuda, whereas the model is on meta. You may experience unexpected behaviors or slower generation. Please make sure that you have put `input_ids` to the correct device by calling for example input_ids = input_ids.to('meta') before running `.generate()`.
+  warnings.warn(

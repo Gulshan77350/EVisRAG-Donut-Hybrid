@@ -1,0 +1,5 @@
+nf4, all on GPU                                13.12 tok/s  GPU used 3.55 GB
+nf4 run 2, repetition_penalty                  13.68 tok/s  GPU used 3.55 GB
+nf4 run 3, repetition_penalty                  13.55 tok/s  GPU used 3.55 GB
+nf4 run 4, repetition_penalty                  13.47 tok/s  GPU used 3.55 GB
+nf4 run 5, repetition_penalty                   5.68 tok/s  GPU used 3.55 GB

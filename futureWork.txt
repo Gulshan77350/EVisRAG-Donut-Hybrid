@@ -1,0 +1,113 @@
+FUTURE WORK - steps to make the Donut + EVisRAG thesis publishable
+(Written 2 Oct 2026. To be done on the college GPU node: 2x Tesla V100 16 GB, 40 CPU, 384 GB RAM)
+
+Goal / paper claim
+  Show, with measured numbers on the EVisRAG paper's own test sets, ONE of:
+   (a) about the same accuracy as EVisRAG at much lower memory/time (runs on a 6 GB laptop), or
+   (b) better accuracy at lower cost (via page pruning, step 4).
+  "Lighter but clearly worse" is not enough.
+
+------------------------------------------------------------------
+STEP 1 - Set up the college GPU
+------------------------------------------------------------------
+  1. Find out the scheduler (PBS or SLURM) and write the job scripts.
+  2. Create a Python env with a PyTorch build for CUDA 12.x (V100 = compute 7.0).
+  3. Copy hf_cache/ and data/ to the cluster (compute nodes may have no internet);
+     set HF_HUB_OFFLINE=1.
+  4. V100 notes: no bf16 and no FlashAttention-2 -> use fp16 + attn_implementation="sdpa".
+     Test a few questions first for NaN/garbage output in fp16.
+     EVisRAG-7B fp16 (~16.6 GB) needs both GPUs (device_map="auto"); 3B fits on one.
+     Use plain HF generate (recent vLLM may not support V100).
+  5. Delete results/ChartQA/hybrid_3B.jsonl (5 smoke-test rows only).
+
+------------------------------------------------------------------
+STEP 2 - Reproduce the base paper (fair baseline)   [MUST DO]
+------------------------------------------------------------------
+  1. Run image-based EVisRAG-3B and EVisRAG-7B (fp16, paper resolution, top-3 pages)
+     on ALL 5 test sets: ChartQA, DocVQA, InfoVQA, SlideVQA, ViDoSeek (~4,250 questions).
+     Data: openbmb/EVisRAG-Test-* (InfoVQA, ViDoSeek still to download).
+  2. Score with eval/score.py (official EVisRAG metric).
+  3. Check the numbers match the paper's Table 1 (3B avg 69.21, 7B avg 75.50).
+     If they differ, find out why before going further.
+  4. Record per question: accuracy, latency, peak GPU memory, prompt/visual tokens.
+
+------------------------------------------------------------------
+STEP 3 - Run the current hybrid (Donut + EVisRAG-3B) on the same sets
+------------------------------------------------------------------
+  1. eval/run_eval.py --system hybrid on all 5 sets (same questions and pages).
+  2. "Donut only" baseline comes free from the hybrid readings (eval/score.py).
+  3. Main results table: Donut only | Hybrid | EVisRAG-3B images | EVisRAG-7B images.
+
+------------------------------------------------------------------
+STEP 4 - Page pruning with image fallback   [main new method]
+------------------------------------------------------------------
+  1. Confident Donut reading  -> answer text-only (cheap path, as now).
+  2. Not confident            -> send only the 1-2 pages Donut flags to image EVisRAG
+                                 (not all 3 pages).
+  3. Fewer distractor pages should cut image tokens AND may raise accuracy
+     (EVisRAG's own motivation is hallucination from distractor pages).
+  4. Measure pruning quality with the page relevance labels
+     (DocVQA, InfoVQA, SlideVQA have them; ChartQA does not).
+
+------------------------------------------------------------------
+STEP 5 - Better lightweight reader
+------------------------------------------------------------------
+  Donut is the weakest part (DocVQA 67.5; 0/5 on ChartQA smoke test).
+  1. Compare 2-3 small readers: Pix2Struct-DocVQA, Florence-2 (0.23B/0.77B),
+     a small VLM (Qwen2-VL-2B or SmolVLM).
+  2. Route chart pages to a chart reader (DePlot or MatCha: chart -> table).
+     This is what can fix ChartQA.
+  3. Report a reader-comparison table (accuracy vs. speed vs. memory).
+
+------------------------------------------------------------------
+STEP 6 - Train the reasoner on reader evidence (distillation)   [if time allows]
+------------------------------------------------------------------
+  1. Run image EVisRAG-7B on openbmb/EVisRAG-Train to get reasoning traces.
+  2. LoRA fine-tune EVisRAG-3B (fp16, fits in 16 GB) to give those answers from
+     the reader's text instead of the images.
+  3. Expected: recovers most of the accuracy gap; a real method contribution.
+
+------------------------------------------------------------------
+STEP 7 - Abstention ("I don't know") as a measured result
+------------------------------------------------------------------
+  1. Choose the confidence threshold on a held-out dev split (not by hand).
+  2. Report AUROC (relevant vs. irrelevant pages) and an accuracy-vs-coverage curve.
+  3. Compare accuracy on "insufficient" questions with the EVisRAG paper.
+
+------------------------------------------------------------------
+STEP 8 - Ablations and statistics
+------------------------------------------------------------------
+  1. Ablations: threshold, alternative readings on/off, prefilled vs. free evidence,
+     planner on/off, 3B vs. 7B reasoner.
+  2. Full test sets for final numbers (not 200-question subsets).
+  3. Bootstrap 95% confidence intervals + McNemar test vs. the baseline.
+
+------------------------------------------------------------------
+STEP 9 - Cost on two hardware tiers
+------------------------------------------------------------------
+  1. V100 fp16: all accuracy numbers.
+  2. Laptop RTX 4050 6 GB, 4-bit: latency and memory with the same code
+     (supports the "runs on a consumer GPU" claim).
+     Set Windows power mode to "Best performance" first (Balanced gives ~1.8 tok/s
+     instead of ~13 tok/s).
+
+------------------------------------------------------------------
+STEP 10 - Privacy direction (cross-image linkage leakage)
+------------------------------------------------------------------
+  4 test cases is too few. Either expand to 200+ generated cases, or move it to
+  future work / a separate paper. Keep this paper focused on efficiency.
+
+------------------------------------------------------------------
+STEP 11 - Write-up and release
+------------------------------------------------------------------
+  1. Fix slide/report inconsistencies: slides say Ubuntu/WSL2 and CORD/SynthDoG images,
+     but the code runs on Windows with synthetic pages (make_samples.py).
+  2. Write the paper: method, main table, pruning, reader comparison, abstention,
+     ablations, cost, limitations.
+  3. Release code, configs and seeds on GitHub.
+  4. Target: IEEE/Springer conference or an ICDAR / WACV workshop;
+     a stronger venue if step 6 works well.
+
+Rough timeline: 4-6 weeks after midsems
+  Week 1-2: Steps 1-3 | Week 2-3: Step 4 | Week 3-4: Step 5 | Week 4-5: Step 6 (optional)
+  Week 5-6: Steps 7-11

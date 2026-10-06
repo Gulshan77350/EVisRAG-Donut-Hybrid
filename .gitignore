@@ -1,0 +1,15 @@
+﻿env/
+hf_cache/
+wheels/
+data/
+results/
+samples/
+__pycache__/
+*.pyc
+*.log
+*.parquet
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.whl
